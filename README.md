@@ -5,7 +5,6 @@ An intelligent, AI-powered web application that automatically discovers, filters
 ![React](https://img.shields.io/badge/React-18.3.1-blue)
 ![Vite](https://img.shields.io/badge/Vite-5.4.0-purple)
 ![Groq API](https://img.shields.io/badge/Groq%20API-llama--3.3--70b-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
@@ -419,12 +418,6 @@ Contributions welcome! Areas for improvement:
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
