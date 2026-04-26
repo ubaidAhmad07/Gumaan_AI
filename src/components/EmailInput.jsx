@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { initAI, processEmails } from '../services/aiService.js';
+import { processEmails } from '../services/aiService.js';
 import { sampleEmails } from '../utils/sampleEmails.js';
 
 export default function EmailInput() {
   const { state, dispatch } = useApp();
-  const { emailText, profile, apiKey } = state;
+  const { emailText, profile } = state;
   const fileRef = useRef(null);
 
   const parseEmails = (text) => {
@@ -37,7 +37,6 @@ export default function EmailInput() {
     if (emails.length === 0) return;
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      initAI(apiKey);
       const results = await processEmails(emails, profile);
       dispatch({ type: 'SET_RESULTS', payload: results });
       dispatch({ type: 'SET_STEP', payload: 2 });

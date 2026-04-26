@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export function exportToPDF(opportunities, profile) {
   const doc = new jsPDF();
@@ -71,41 +71,82 @@ export function exportToPDF(opportunities, profile) {
   doc.save('opportunity-report.pdf');
 }
 
-export function exportToExcel(opportunities, profile) {
-  const data = opportunities.map((opp, i) => ({
-    'Rank': i + 1,
-    'Title': opp.title,
-    'Type': opp.type,
-    'Organization': opp.organization || 'N/A',
-    'Deadline': opp.deadline,
-    'Overall Score': opp.overallScore,
-    'Profile Fit': opp.profileFitScore,
-    'Urgency': opp.urgencyScore,
-    'Eligibility': (opp.eligibility || []).join('; '),
-    'Required Documents': (opp.requiredDocuments || []).join('; '),
-    'Benefits': opp.benefits || 'N/A',
-    'Application Link': opp.applicationLink || 'N/A',
-    'Fit Reason': opp.fitReason || 'N/A',
-    'Action Steps': (opp.actionSteps || []).join('; ')
-  }));
+export async function exportToExcel(opportunities, profile) {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'OpportunityAI';
+  workbook.created = new Date();
 
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Opportunities');
+  // Opportunities sheet
+  const ws = workbook.addWorksheet('Opportunities');
+  ws.columns = [
+    { header: 'Rank', key: 'rank', width: 8 },
+    { header: 'Title', key: 'title', width: 35 },
+    { header: 'Type', key: 'type', width: 18 },
+    { header: 'Organization', key: 'organization', width: 25 },
+    { header: 'Deadline', key: 'deadline', width: 18 },
+    { header: 'Overall Score', key: 'overallScore', width: 14 },
+    { header: 'Profile Fit', key: 'profileFitScore', width: 14 },
+    { header: 'Urgency', key: 'urgencyScore', width: 12 },
+    { header: 'Eligibility', key: 'eligibility', width: 30 },
+    { header: 'Required Documents', key: 'requiredDocuments', width: 30 },
+    { header: 'Benefits', key: 'benefits', width: 30 },
+    { header: 'Application Link', key: 'applicationLink', width: 30 },
+    { header: 'Fit Reason', key: 'fitReason', width: 40 },
+    { header: 'Action Steps', key: 'actionSteps', width: 40 },
+  ];
+
+  // Style header row
+  ws.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF6C5CE7' } };
+
+  opportunities.forEach((opp, i) => {
+    ws.addRow({
+      rank: i + 1,
+      title: opp.title,
+      type: opp.type,
+      organization: opp.organization || 'N/A',
+      deadline: opp.deadline,
+      overallScore: opp.overallScore,
+      profileFitScore: opp.profileFitScore,
+      urgencyScore: opp.urgencyScore,
+      eligibility: (opp.eligibility || []).join('; '),
+      requiredDocuments: (opp.requiredDocuments || []).join('; '),
+      benefits: opp.benefits || 'N/A',
+      applicationLink: opp.applicationLink || 'N/A',
+      fitReason: opp.fitReason || 'N/A',
+      actionSteps: (opp.actionSteps || []).join('; '),
+    });
+  });
 
   // Profile sheet
-  const profileData = [
-    { Field: 'Name', Value: profile.name || 'N/A' },
-    { Field: 'Program', Value: profile.program || 'N/A' },
-    { Field: 'Semester', Value: profile.semester || 'N/A' },
-    { Field: 'CGPA', Value: profile.cgpa || 'N/A' },
-    { Field: 'Skills', Value: (profile.skills || []).join(', ') },
-    { Field: 'Preferred Types', Value: (profile.preferredTypes || []).join(', ') },
-    { Field: 'Financial Need', Value: profile.financialNeed || 'N/A' },
-    { Field: 'Location', Value: profile.location || 'N/A' },
+  const ws2 = workbook.addWorksheet('Student Profile');
+  ws2.columns = [
+    { header: 'Field', key: 'field', width: 20 },
+    { header: 'Value', key: 'value', width: 50 },
   ];
-  const ws2 = XLSX.utils.json_to_sheet(profileData);
-  XLSX.utils.book_append_sheet(wb, ws2, 'Student Profile');
+  ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF6C5CE7' } };
 
-  XLSX.writeFile(wb, 'opportunity-report.xlsx');
+  const profileRows = [
+    { field: 'Name', value: profile.name || 'N/A' },
+    { field: 'Program', value: profile.program || 'N/A' },
+    { field: 'Semester', value: profile.semester || 'N/A' },
+    { field: 'CGPA', value: profile.cgpa || 'N/A' },
+    { field: 'Skills', value: (profile.skills || []).join(', ') },
+    { field: 'Preferred Types', value: (profile.preferredTypes || []).join(', ') },
+    { field: 'Financial Need', value: profile.financialNeed || 'N/A' },
+    { field: 'Location', value: profile.location || 'N/A' },
+  ];
+  profileRows.forEach(row => ws2.addRow(row));
+
+  // Generate file and trigger download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'opportunity-report.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
 }
+

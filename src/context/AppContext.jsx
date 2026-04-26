@@ -4,7 +4,7 @@ const AppContext = createContext();
 
 const initialState = {
   currentStep: 0, // 0=profile, 1=emails, 2=results
-  apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
+
   profile: JSON.parse(localStorage.getItem('student_profile') || 'null') || {
     name: '',
     program: '',
@@ -43,7 +43,7 @@ function reducer(state, action) {
     case 'TOGGLE_SIDEBAR':
       return { ...state, sidebarOpen: !state.sidebarOpen };
     case 'RESET':
-      return { ...initialState, apiKey: state.apiKey, profile: state.profile };
+      return { ...initialState, profile: state.profile };
     default:
       return state;
   }

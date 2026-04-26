@@ -1,13 +1,13 @@
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-let apiKey = null;
-
-export function initAI(key) {
-  apiKey = key;
-}
+// Read configuration from environment variables
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const SYSTEM_MESSAGE = import.meta.env.VITE_AI_SYSTEM_MESSAGE;
+const PROMPT_TEMPLATE = import.meta.env.VITE_AI_PROMPT;
 
 export async function processEmails(emails, profile) {
-  if (!apiKey) throw new Error('API key not set. Please enter your Groq API key.');
+  if (!API_KEY) throw new Error('API key not set. Please add VITE_GROQ_API_KEY to your .env file.');
+  if (!PROMPT_TEMPLATE) throw new Error('Prompt template not set. Please add VITE_AI_PROMPT to your .env file.');
 
   const profileSummary = `
 Student Profile:
@@ -24,71 +24,28 @@ Student Profile:
 
   const emailList = emails.map((email, i) => `--- EMAIL ${i + 1} ---\n${email}\n--- END EMAIL ${i + 1} ---`).join('\n\n');
 
-  const prompt = `You are an AI Opportunity Copilot. Analyze the following emails and student profile.
+  // Build the prompt by replacing placeholders in the template
+  const prompt = PROMPT_TEMPLATE
+    .replace(/\\n/g, '\n')
+    .replace('{{PROFILE_SUMMARY}}', profileSummary)
+    .replace('{{EMAIL_LIST}}', emailList)
+    .replace('{{TODAY_DATE}}', new Date().toISOString().split('T')[0]);
 
-${profileSummary}
-
-Here are the emails to analyze:
-
-${emailList}
-
-For EACH email, do the following:
-1. Classify whether it contains a genuine opportunity (scholarship, internship, fellowship, competition, financial aid) or is irrelevant (spam, ads, general messages).
-2. For genuine opportunities, extract structured data.
-3. Score and rank opportunities by relevance to the student profile.
-
-Return a JSON object with this EXACT structure (no markdown, no code fences, just raw JSON):
-{
-  "opportunities": [
-    {
-      "emailIndex": <number, 0-based index of the email>,
-      "isGenuine": true,
-      "title": "<opportunity title>",
-      "type": "<Scholarship|Internship|Fellowship|Competition|Financial Aid|Other>",
-      "organization": "<offering organization>",
-      "deadline": "<deadline date string or 'Not specified'>",
-      "eligibility": ["<criterion 1>", "<criterion 2>"],
-      "requiredDocuments": ["<doc 1>", "<doc 2>"],
-      "benefits": "<brief summary of benefits>",
-      "applicationLink": "<URL or 'Not provided'>",
-      "contactInfo": "<email/phone or 'Not provided'>",
-      "profileFitScore": <0-100, how well this matches the student>,
-      "urgencyScore": <0-100, based on deadline proximity and time sensitivity>,
-      "completenessScore": <0-100, how complete the info is>,
-      "overallScore": <0-100, weighted composite>,
-      "fitReason": "<1-2 sentences explaining why this is/isn't a good fit>",
-      "actionSteps": ["<step 1>", "<step 2>", "<step 3>"]
-    }
-  ],
-  "rejected": [
-    {
-      "emailIndex": <number>,
-      "reason": "<why this was rejected, e.g. 'Advertisement/spam', 'Not an opportunity'>"
-    }
-  ],
-  "summary": "<2-3 sentence overall summary for the student>"
-}
-
-Important rules:
-- Only include genuine opportunities in the "opportunities" array
-- Rank opportunities by overallScore descending
-- Be specific in fitReason based on the student's actual profile
-- For urgency, consider today's date is ${new Date().toISOString().split('T')[0]}
-- Action steps should be concrete and actionable
-- If deadline has passed, still include but note it and give low urgency`;
+  const systemMessage = (SYSTEM_MESSAGE || 'You are a helpful AI assistant that analyzes opportunity emails for students. You MUST respond with valid JSON only — no markdown, no code fences, no extra text.')
+    .replace(/\\n/g, '\n');
 
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${API_KEY}`,
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful AI assistant that analyzes opportunity emails for students. You MUST respond with valid JSON only — no markdown, no code fences, no extra text.'
+          content: systemMessage
         },
         {
           role: 'user',
@@ -132,3 +89,4 @@ Important rules:
     throw new Error('Failed to parse AI response. Please try again.');
   }
 }
+

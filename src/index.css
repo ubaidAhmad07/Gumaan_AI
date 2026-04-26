@@ -325,6 +325,11 @@ h1, h2, h3, h4, .headline { font-family: 'Space Grotesk', sans-serif; letter-spa
 .badge-competition { background: #fff3e0; color: #e65100; }
 .badge-financial-aid { background: var(--tertiary-fixed); color: var(--tertiary); }
 .badge-other { background: var(--surface-container-high); color: var(--on-surface-variant); }
+.badge-research { background: #e3f2fd; color: #1565c0; }
+.badge-field-exact-match { background: #e8f5e9; color: #2e7d32; }
+.badge-field-partial-overlap { background: #fff8e1; color: #f57f17; }
+.badge-field-field-agnostic { background: var(--surface-container-high); color: var(--on-surface-variant); }
+.badge-field-mismatch { background: #ffebee; color: #c62828; }
 
 .opp-card-title {
   font-family: 'Space Grotesk', sans-serif;

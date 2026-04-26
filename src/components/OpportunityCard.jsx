@@ -14,6 +14,11 @@ export default function OpportunityCard({ opp, rank }) {
         <div style={{ flex: 1 }}>
           <div className="opp-card-badges">
             <span className={badgeClass}>{opp.type}</span>
+            {opp.fieldMatch && (
+              <span className={`badge badge-field-${(opp.fieldMatch || '').toLowerCase().replace(/\s+/g, '-')}`}>
+                {opp.fieldMatch === 'Exact Match' ? '✓ ' : opp.fieldMatch === 'Mismatch' ? '✗ ' : ''}{opp.fieldMatch}
+              </span>
+            )}
             {opp.organization && <span style={{ fontFamily: 'Inter', fontSize: '0.75rem', color: 'var(--on-surface-variant)' }}>{opp.organization}</span>}
           </div>
           <div className="opp-card-title">{opp.title}</div>
