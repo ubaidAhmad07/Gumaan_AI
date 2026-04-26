@@ -136,7 +136,7 @@ Documents Required:
 - Proof of language proficiency
 - Academic transcripts
 
-Contact: fellowship@daad.de
+Contact: fellowship@example.com
 
 Best,
 DAAD Pakistan Office`,
@@ -183,7 +183,7 @@ Required:
 - CNIC/B-Form copies
 - Personal essay
 
-Questions? Email: nop@lums.edu.pk
+Questions? Email: nop@university.edu
 
 Best wishes,
 LUMS Financial Aid Office`

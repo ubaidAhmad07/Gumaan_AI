@@ -87,7 +87,7 @@ export default function EmailInput() {
 
             <textarea className="form-textarea large" value={emailText}
               onChange={(e) => dispatch({ type: 'SET_EMAIL_TEXT', payload: e.target.value })}
-              placeholder={"To: contact@example.com\nFrom: lead@startup.io\nSubject: Scholarship Opportunity\n\nFollowing up on the fellowship program...\n\n---\n\nSubject: Internship Opening\nHi, Google is accepting applications..."} />
+              placeholder={"To: student@university.edu\nFrom: admissions@college.edu\nSubject: Scholarship Opportunity\n\nFollowing up on the fellowship program...\n\n---\n\nSubject: Internship Opening\nHi, we are accepting applications..."} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, padding: '0 8px' }}>
               <span className="form-help">Accepts plain text, HTML, or standard email headers. Separate with ---</span>
