@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { SignInButton, SignUpButton, UserButton, useAuth, SignIn, SignUp } from '@clerk/react';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 import StudentProfileForm from './components/StudentProfileForm.jsx';
 import EmailInput from './components/EmailInput.jsx';
@@ -22,6 +24,7 @@ function LiveTime() {
 function Sidebar() {
   const { state, dispatch } = useApp();
   const { currentStep, sidebarOpen } = state;
+  const { userId } = useAuth();
 
   const navItems = [
     { icon: 'person', label: 'Profile', step: 0, filled: true },
@@ -41,7 +44,7 @@ function Sidebar() {
       {sidebarOpen && <div className="mobile-overlay" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
         style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 39 }} />}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
+        <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '1rem' }}>
           <div className="sidebar-brand">
             <div className="sidebar-logo">G</div>
             <div>
@@ -49,6 +52,9 @@ function Sidebar() {
               <div className="sidebar-subtitle">Opportunity Copilot</div>
             </div>
           </div>
+          {userId && (
+            <UserButton />
+          )}
         </div>
         <nav className="sidebar-nav">
           {navItems.map((item) => (
@@ -85,13 +91,18 @@ function Sidebar() {
 
 function MobileHeader() {
   const { dispatch } = useApp();
+  const { userId } = useAuth();
   return (
-    <div className="mobile-header">
+    <div className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <button className="btn-ghost" onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} style={{ padding: 4 }}>
         <span className="material-symbols-outlined">menu</span>
       </button>
       <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, color: '#312e81', fontSize: '1.1rem' }}>GUMAAN AI</span>
-      <div style={{ width: 28 }} />
+      <div>
+        {userId && (
+          <UserButton />
+        )}
+      </div>
     </div>
   );
 }
@@ -142,10 +153,54 @@ function AppContent() {
   );
 }
 
-export default function App() {
+function Home() {
+  const { userId } = useAuth();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f8fafc' }}>
+      <h1 style={{ fontFamily: 'Space Grotesk', color: '#312e81', fontSize: '3rem', marginBottom: '1rem' }}>GUMAAN AI</h1>
+      <p style={{ color: '#64748b', fontSize: '1.2rem', marginBottom: '2rem' }}>Opportunity Copilot for Students</p>
+      
+      {!userId ? (
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <SignInButton mode="modal">
+            <button style={{ padding: '0.75rem 1.5rem', background: '#4f46e5', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Sign In</button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button style={{ padding: '0.75rem 1.5rem', background: '#fff', color: '#4f46e5', border: '1px solid #4f46e5', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Sign Up</button>
+          </SignUpButton>
+        </div>
+      ) : (
+        <Link to="/dashboard" style={{ padding: '0.75rem 1.5rem', background: '#4f46e5', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>
+          Go to Dashboard
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function ProtectedDashboard() {
+  const { isLoaded, userId } = useAuth();
+
+  if (!isLoaded) return <LoadingIndicator />;
+  if (!userId) return <Navigate to="/sign-in" />;
+
   return (
     <AppProvider>
       <AppContent />
     </AppProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/sign-in/*" element={<div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}><SignIn routing="path" path="/sign-in" /></div>} />
+        <Route path="/sign-up/*" element={<div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}><SignUp routing="path" path="/sign-up" /></div>} />
+        <Route path="/dashboard" element={<ProtectedDashboard />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
