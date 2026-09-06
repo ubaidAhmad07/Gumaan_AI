@@ -41,7 +41,7 @@ Student Profile:
       'Authorization': `Bearer ${API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-20b',
       messages: [
         {
           role: 'system',
@@ -52,9 +52,8 @@ Student Profile:
           content: prompt
         }
       ],
-      temperature: 0.3,
+      reasoning_effort: 'medium',
       max_tokens: 4096,
-      response_format: { type: 'json_object' },
     }),
   });
 

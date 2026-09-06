@@ -89,7 +89,7 @@ Click **"Submit Emails for Analysis"** and wait 10-20 seconds while the AI proce
 |-------|------------|
 | **UI Framework** | React 18.3.1 |
 | **Build Tool** | Vite 5.4.0 |
-| **AI Provider** | Groq API (llama-3.3-70b-versatile) |
+| **AI Provider** | Groq API (openai/gpt-oss-20b) |
 | **State Management** | React `useReducer` + Context API |
 | **Styling** | Vanilla CSS (design tokens via CSS variables) |
 | **Export** | jsPDF + SheetJS |
@@ -131,7 +131,7 @@ EmailInput Component (parse emails into array)
     ↓
 aiService.js (build prompt + call Groq API)
     ↓
-Groq API (llama-3.3-70b-versatile, JSON mode)
+Groq API (openai/gpt-oss-20b, reasoning model)
     ↓
 JSON Response (opportunities + rejected emails)
     ↓
